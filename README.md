@@ -6,7 +6,11 @@ A dedicated scoreboard for Magic: The Gathering Commander games.
 
 Design document in `docs/design-document.tex` describing a 4-screen device for tracking life totals and commander damage.
 
-## Building
+## View Online
+
+**[Design Document (PDF)](https://rationelis.github.io/mtg-scoreboard/design-document.pdf)**
+
+## Building Locally
 
 Requires a TeX distribution with TikZ (TeX Live, MiKTeX, or MacTeX).
 
@@ -14,8 +18,6 @@ Requires a TeX distribution with TikZ (TeX Live, MiKTeX, or MacTeX).
 cd docs
 pdflatex design-document.tex
 ```
-
-Alternatively, PDFs are built automatically on each push—download from the Actions tab.
 
 ## Installation
 
@@ -28,3 +30,4 @@ Alternatively, PDFs are built automatically on each push—download from the Act
 ## License
 
 MIT
+
