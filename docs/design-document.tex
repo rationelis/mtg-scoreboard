@@ -31,6 +31,55 @@ Magic: The Gathering is a trading card game. \textbf{Commander} is a multiplayer
 
 This document describes a dedicated scoreboard: a device placed in the center of the table with four screens arranged in a 2$\times$2 grid, one facing each player.
 
+\section{Concept Overview}
+
+\begin{center}
+\begin{tikzpicture}[
+    screen/.style={rectangle, draw, thick, minimum width=2.2cm, minimum height=1.8cm, font=\bfseries, align=center},
+    btn/.style={circle, draw, thick, minimum size=0.5cm, font=\tiny},
+    dial/.style={circle, draw, thick, minimum size=0.6cm, font=\tiny},
+    shared/.style={rectangle, draw, thick, rounded corners, minimum width=1.2cm, minimum height=0.5cm, font=\tiny, align=center},
+    adminpanel/.style={rectangle, draw, thick, minimum width=1.8cm, minimum height=2.5cm, font=\scriptsize, align=center, fill=gray!10}
+]
+    % Screens (2x2 grid)
+    \node[screen, fill=p1!20] (S1) at (-1.5, 1.5) {P1\\40};
+    \node[screen, fill=p2!20] (S2) at (1.5, 1.5) {P2\\40};
+    \node[screen, fill=p3!20] (S3) at (-1.5, -1.5) {P3\\40};
+    \node[screen, fill=p4!20] (S4) at (1.5, -1.5) {P4\\40};
+
+    % Player dials (one per player, adjacent to screen)
+    \node[dial] (D1) at (-2.8, 1.5) {};
+    \node[font=\tiny, left] at (-3.1, 1.5) {P1};
+
+    \node[dial] (D2) at (2.8, 1.5) {};
+    \node[font=\tiny, right] at (3.1, 1.5) {P2};
+
+    \node[dial] (D3) at (-2.8, -1.5) {};
+    \node[font=\tiny, left] at (-3.1, -1.5) {P3};
+
+    \node[dial] (D4) at (2.8, -1.5) {};
+    \node[font=\tiny, right] at (3.1, -1.5) {P4};
+
+    % Shared controls (center bottom)
+    \node[btn, fill=p1!40] at (-1.2, -3.2) {P1};
+    \node[btn, fill=p2!40] at (-0.4, -3.2) {P2};
+    \node[btn, fill=p3!40] at (0.4, -3.2) {P3};
+    \node[btn, fill=p4!40] at (1.2, -3.2) {P4};
+    \node[shared, fill=yellow!20] (CMD) at (-1.5, -4) {Cmdr Dmg};
+    \node[shared, fill=green!20] (CONFIRM) at (0, -4) {Confirm};
+    \node[shared, fill=red!20] (CANCEL) at (1.5, -4) {Cancel};
+
+    % Admin panel (side)
+    \node[adminpanel] (ADMIN) at (5.5, 0) {Admin\\[0.3em]New Game\\Players\\Start HP};
+
+    % Legend
+    \node[font=\scriptsize, align=left] at (5.5, -2.5) {
+        \tikz\node[btn, fill=gray!40, minimum size=0.3cm]{}; Player Btn\\
+        \tikz\node[dial, minimum size=0.3cm]{}; Dial
+    };
+\end{tikzpicture}
+\end{center}
+
 \section{Requirements}
 
 The device must:
@@ -84,16 +133,73 @@ Accessed via hidden menu (e.g., hold button) or dedicated interface.
 
 \section{Design Constraints}
 
+\subsection{Input Hardware}
+
+Each player has:
+\begin{itemize}
+    \item \textbf{Dial} --- rotary encoder for adjusting values
+\end{itemize}
+
+\noindent Shared controls:
+\begin{itemize}
+    \item \textbf{Commander damage button} --- enters commander damage mode
+    \item \textbf{Player buttons} --- select source/target in commander damage mode
+    \item \textbf{Confirm button} --- commits commander damage
+    \item \textbf{Cancel button} --- exits commander damage mode without changes
+\end{itemize}
+
 \subsection{How do players adjust values?}
 
 Life totals are simple: each player adjusts their own screen. Input must be \textbf{local}---no passing devices.
 
-Commander damage is harder. It requires specifying \emph{source}, \emph{target}, and \emph{amount}. Options:
-\begin{itemize}
-    \item Source-initiated: attacker selects target, enters damage
-    \item Target-initiated: damaged player selects source, enters damage received
-    \item Modal: switch between ``life mode'' and ``commander damage mode''
-\end{itemize}
+Commander damage requires a multi-step input flow:
+
+\begin{enumerate}
+    \item Press the \textbf{commander damage button} --- all four player buttons begin flashing
+    \item Select the \textbf{source} (attacker) --- that button turns green, others keep flashing
+    \item Select the \textbf{target} (defender) --- that button turns red, flashing stops
+    \item Source player \textbf{adjusts damage} using their dial
+    \item Press \textbf{confirm} to commit
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[
+    btn/.style={circle, draw, thick, minimum size=0.8cm, font=\footnotesize},
+    flash/.style={btn, fill=yellow!40},
+    src/.style={btn, fill=green!40},
+    tgt/.style={btn, fill=red!40},
+    off/.style={btn, fill=gray!20}
+]
+    % Step 1: All flashing
+    \node[font=\small\bfseries] at (0, 1.2) {1. Mode};
+    \node[flash] at (-0.5, 0.4) {P1};
+    \node[flash] at (0.5, 0.4) {P2};
+    \node[flash] at (-0.5, -0.4) {P3};
+    \node[flash] at (0.5, -0.4) {P4};
+
+    % Step 2: Source selected
+    \node[font=\small\bfseries] at (2.5, 1.2) {2. Source};
+    \node[src] at (2, 0.4) {P1};
+    \node[flash] at (3, 0.4) {P2};
+    \node[flash] at (2, -0.4) {P3};
+    \node[flash] at (3, -0.4) {P4};
+
+    % Step 3: Target selected
+    \node[font=\small\bfseries] at (5, 1.2) {3. Target};
+    \node[src] at (4.5, 0.4) {P1};
+    \node[off] at (5.5, 0.4) {P2};
+    \node[tgt] at (4.5, -0.4) {P3};
+    \node[off] at (5.5, -0.4) {P4};
+
+    % Step 4: Adjust
+    \node[font=\small\bfseries] at (7.5, 1.2) {4. Adjust};
+    \node[src] at (7, 0.4) {P1};
+    \node[off] at (8, 0.4) {P2};
+    \node[tgt] at (7, -0.4) {P3};
+    \node[off] at (8, -0.4) {P4};
+    \node[font=\scriptsize] at (7.5, -1) {P1 dials +3};
+\end{tikzpicture}
+\end{center}
 
 \subsection{How do we display commander damage?}
 
