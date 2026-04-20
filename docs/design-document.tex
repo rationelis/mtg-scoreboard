@@ -1,0 +1,120 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+
+\title{MTG Commander Scoreboard\\[0.5em]\large Design Document}
+\author{}
+\date{}
+
+% Colors
+\definecolor{p1}{RGB}{228,87,46}
+\definecolor{p2}{RGB}{0,115,178}
+\definecolor{p3}{RGB}{76,175,80}
+\definecolor{p4}{RGB}{156,39,176}
+
+% Styles
+\tikzset{
+    player/.style={rectangle, draw, thick, minimum size=1.6cm, font=\bfseries, align=center},
+    admin/.style={rectangle, draw, thick, minimum width=3cm, minimum height=1.2cm, font=\small, align=center},
+    edge/.style={->, >={Stealth[length=2mm]}, thick, bend left=12},
+    lbl/.style={font=\scriptsize, fill=white, inner sep=1pt}
+}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+Magic: The Gathering is a trading card game. \textbf{Commander} is a multiplayer format typically played with 4 players, each starting at 40 life. Players also track \emph{commander damage}---if you take 21 damage from any single opponent's commander, you lose.
+
+This document describes a dedicated scoreboard: a device placed in the center of the table with four screens arranged in a 2$\times$2 grid, one facing each player.
+
+\section{Requirements}
+
+The device must:
+
+\begin{enumerate}
+    \item \textbf{Track life totals} --- one value per player ($n$ values)
+    \item \textbf{Track commander damage} --- one value per ordered pair of players ($n \times (n-1)$ values)
+    \item \textbf{Provide an admin panel} --- reset game, configure player count and starting life
+\end{enumerate}
+
+\subsection{Life Totals}
+
+\begin{center}
+\begin{tikzpicture}
+    \node[player, fill=p1!20] (P1) at (0, 1.8) {P1\\40};
+    \node[player, fill=p2!20] (P2) at (2.2, 1.8) {P2\\40};
+    \node[player, fill=p3!20] (P3) at (0, 0) {P3\\40};
+    \node[player, fill=p4!20] (P4) at (2.2, 0) {P4\\40};
+\end{tikzpicture}
+\end{center}
+
+\subsection{Commander Damage}
+
+\begin{center}
+\begin{tikzpicture}
+    \node[player, fill=p1!20] (P1) at (0, 2) {P1\\37};
+    \node[player, fill=p2!20] (P2) at (3, 2) {P2\\31};
+    \node[player, fill=p3!20] (P3) at (0, 0) {P3\\40};
+    \node[player, fill=p4!20] (P4) at (3, 0) {P4\\19};
+
+    \draw[edge, p1] (P1) to node[lbl] {7} (P2);
+    \draw[edge, p2] (P2) to node[lbl] {3} (P1);
+    \draw[edge, p1] (P1) to node[lbl, pos=0.3] {15} (P4);
+    \draw[edge, p4] (P4) to node[lbl, pos=0.7] {6} (P1);
+    \draw[edge, p2] (P2) to node[lbl] {9} (P4);
+    \draw[edge, p3] (P3) to node[lbl] {11} (P4);
+\end{tikzpicture}
+\end{center}
+
+For 4 players: $4 \times 3 = 12$ directed values to track.
+
+\subsection{Admin Panel}
+
+\begin{center}
+\begin{tikzpicture}
+    \node[admin, fill=gray!10] (admin) {New Game\\Player Count\\Starting Life};
+\end{tikzpicture}
+\end{center}
+
+Accessed via hidden menu (e.g., hold button) or dedicated interface.
+
+\section{Design Constraints}
+
+\subsection{How do players adjust values?}
+
+Life totals are simple: each player adjusts their own screen. Input must be \textbf{local}---no passing devices.
+
+Commander damage is harder. It requires specifying \emph{source}, \emph{target}, and \emph{amount}. Options:
+\begin{itemize}
+    \item Source-initiated: attacker selects target, enters damage
+    \item Target-initiated: damaged player selects source, enters damage received
+    \item Modal: switch between ``life mode'' and ``commander damage mode''
+\end{itemize}
+
+\subsection{How do we display commander damage?}
+
+Showing 12 values on 4 screens is cluttered. Options:
+\begin{itemize}
+    \item Per-player view: each screen shows only that player's 3 incoming values
+    \item On-demand: hidden by default, shown when needed
+    \item Central display: a fifth screen or overlay shows the full graph
+\end{itemize}
+
+\subsection{Complexity Summary}
+
+\begin{center}
+\begin{tabular}{lcc}
+\hline
+\textbf{Feature} & \textbf{Values} & \textbf{Difficulty} \\
+\hline
+Life totals & $n$ & Simple \\
+Commander damage & $n(n-1)$ & Hard \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{document}
