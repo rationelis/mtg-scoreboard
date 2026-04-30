@@ -3,6 +3,9 @@
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning}
+% Packages for including and aligning images
+\usepackage{graphicx}
+\usepackage{subcaption}
 
 \title{MTG Commander Scoreboard\\[0.5em]\large Design Document}
 \author{}
@@ -222,5 +225,64 @@ Commander damage & $n(n-1)$ & Hard \\
 \hline
 \end{tabular}
 \end{center}
+
+% ********************************************************************************
+% NEW CONTENT START - SECOND DESIGN SECTION
+% ********************************************************************************
+\newpage
+\section{Proposed Input \& Display Revision}
+
+This section details an alternative hardware and interface concept aimed at streamlining input by assigning a dedicated rotary encoder with an integrated push button to each player's screen. The display utilizes segmented graphical bars for intuitive visual tracking.
+
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{image_0.png}
+        \caption{Standard View}
+        \label{fig:rev_std}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{image_1.png}
+        \caption{Commander Mode Selection}
+        \label{fig:rev_cmd_sel}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{image_2.png}
+        \caption{Land Played Indicator}
+        \label{fig:rev_land}
+    \end{subfigure}
+    \caption{Revised Interface Concepts}
+    \label{fig:rev_interface}
+\end{figure}
+
+\subsection{Display Mechanics: Visual Health Tracking}
+
+In this design (Figure \ref{fig:rev_std}), the screen is partitioned into three colored segments at the top. These act as abstract health bars, representing the remaining commander damage tolerance for different opponents (e.g., P2, P3, P4). Total life is displayed as a large number (shown as '30') in the bottom section. As damage is taken, the graphical bars recede and total life decreases.
+
+\subsection{Input Flow: Single-Dial Interaction}
+
+All modifications to a player's screen are performed by that player using their single control knob.
+
+\paragraph{Normal Damage Mode}
+By default, the device operates in normal damage mode. When the player turns the knob, damage is immediately subtracted from the large total health number.
+
+\paragraph{Commander Damage Mode}
+To transition into commander damage mode, a rapid \textbf{double-press} is required on the knob. 
+\begin{enumerate}
+    \item \textbf{Activation:} Upon double-pressing, the interface enters a selection state (seen in Figure \ref{fig:rev_cmd_sel}). The left-most health bar begins lighting up and displays a dedicated damage value, indicating it is the active selection.
+    \item \textbf{Selection:} The player turns the knob to cycle through the available opponent health bars. The active bar and its corresponding number will light up.
+    \item \textbf{Adjustment:} When the desired bar (e.g., the right-most green bar) is highlighted, the player presses down on the knob \textbf{one more time}. The interface is now in active adjustment mode for that specific commander damage total.
+    \item \textbf{Tracking:} Turning the knob will increase or decrease the remaining commander health allowance for that specific player. The graphical bar and the number simultaneously reflect this change. Critically, these changes are immediately mirrored by removing or adding health to the main large total health number.
+\end{enumerate}
+
+\paragraph{Land Played Indicator}
+To track land plays, a \textbf{single click} of the knob while in normal damage mode activates a high-contrast indicator. As shown in Figure \ref{fig:rev_land}, this causes the main large total health number to light up (e.g., changing from gray text on a colored background to highlighted inverse text). 
+
+A second single click on the knob resets the indicator to standard view. Additionally, clicking the knob button on another player's interface will also reset this current player's land indicator while simultaneously highlighting their own.
 
 \end{document}
